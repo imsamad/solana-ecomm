@@ -48,6 +48,14 @@ pub struct AddressSchema {
     address: [u8; 512],
 }
 
+#[derive(Debug, BorshDeserialize, BorshSerialize)]
+pub struct UserProfileSchema {
+    name: [u8; 512],
+    date: i32,
+    month: i32,
+    year: i32,
+}
+
 entrypoint!(handle_entrypoint);
 
 pub fn handle_entrypoint(
@@ -121,13 +129,23 @@ pub fn handle_entrypoint(
                 ],
                 &[&[b"address", account.key.as_ref(), &[address_bump]]],
             )?;
-
+            
+            msg!(
+                "UserProfileSchema size: {}",
+                std::mem::size_of::<UserProfileSchema>()
+            );
+            
+            msg!(
+                "AddressSchema size: {}",
+                std::mem::size_of::<AddressSchema>()
+            );
+            
             invoke_signed(
                 &system_instruction::create_account(
                     account.key,
                     update_user_profile_acount.key,
-                    Rent::get()?.minimum_balance(std::mem::size_of::<AddressSchema>()),
-                    std::mem::size_of::<AddressSchema>().try_into().unwrap(),
+                    Rent::get()?.minimum_balance(std::mem::size_of::<UserProfileSchema>()),
+                    std::mem::size_of::<UserProfileSchema>().try_into().unwrap(),
                     update_user_profile_contract.key,
                 ),
                 &[

@@ -32,6 +32,7 @@ pub fn handle_entrypoint(
 
     let instruction = InstructionData::try_from_slice(instructions)
         .map_err(|_| ProgramError::InvalidInstructionData)?;
+    msg!("Address program invoked done");
 
     if accounts.is_empty() {
         msg!("Provide account!");

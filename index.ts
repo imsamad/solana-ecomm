@@ -222,7 +222,6 @@ export const updateAddress = async (address: string) => {
     programId: program_id,
     data,
   });
- 
 
   // await sendAndConfirmTransaction(
   //   connection,
@@ -236,46 +235,39 @@ export const updateAddress = async (address: string) => {
   );
 };
 
-export const hitAddressPdaAccountFromClient = async(address:string) => {
-  const buffers = [Buffer.from([0]), strToBuffer(address, 512)];
+export const hitAddressPdaAccountFromClient = async (address: string) => {
+  const buffers = [strToBuffer(address, AddressAccountSize)];
 
   const data = Buffer.concat(buffers);
 
   const instruction = new TransactionInstruction({
-    programId:addressContract,
-    keys:[
-      {pubkey:address_account_pda, isSigner:false,isWritable:true}
-    ],
-    data
-  })
+    programId: addressContract,
+    keys: [{ pubkey: address_account_pda, isSigner: false, isWritable: true }],
+    data,
+  });
 
-  // await sendAndConfirmTransaction(
-  //   connection,
-  //   new Transaction().add(instruction),
-  //   [payer]
-  // );
- const hash =  await sendAndConfirmTransaction(
+  const hash = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer]
   );
 
-  console.log('hash: ',hash)
-}
-export const updateProfile = async (profile: UserProfileAccount & {name:string}) => {
+  console.log("hash: ", hash);
+};
+
+export const updateProfile = async (
+  profile: UserProfileAccount & { name: string }
+) => {
   const profileData = {
-    name: strToBuffer(profile.name as string,512),
+    name: strToBuffer(profile.name as string, 512),
     date: profile.date,
     year: profile.year,
     month: profile.month,
-  }
+  };
 
   const serializedData = borsh.serialize(UserProfileSchema, profileData);
 
-  const buffers = [
-    Buffer.from([1]),
-    serializedData,
-  ];
+  const buffers = [Buffer.from([1]), serializedData];
 
   const data = Buffer.concat(buffers);
 
@@ -288,27 +280,31 @@ export const updateProfile = async (profile: UserProfileAccount & {name:string})
     programId: program_id,
     data,
   });
- const hash =  await sendAndConfirmTransaction(
+  const hash = await sendAndConfirmTransaction(
     connection,
     new Transaction().add(instruction),
     [payer]
   );
-  console.log('updateProfile hash: ',hash)
+  console.log("updateProfile hash: ", hash);
 };
 
 export const getAddress = async () => {
   const accountInfo = await connection.getAccountInfo(address_account_pda);
-  if (accountInfo?.data) {
-    const address = borsh.deserialize(AddressSchema, accountInfo?.data);
-    console.log("address is: ", address);
-  }
+  console.log("getAddress accountInfo: ", accountInfo);
+
+  // if (accountInfo?.data) {
+  //   const address = borsh.deserialize(AddressSchema, accountInfo?.data);
+  //   console.log("address is: ", address);
+  // }
 };
 export const getProfile = async () => {
   const accountInfo = await connection.getAccountInfo(user_profile_account_pda);
-  if (accountInfo?.data) {
-    const address = borsh.deserialize(UserProfileSchema, accountInfo?.data);
-    console.log("address is: ", address);
-  }
+  console.log("getProfile accountInfo: ", accountInfo);
+  // return
+  // if (accountInfo?.data) {
+  //   const address = borsh.deserialize(UserProfileSchema, accountInfo?.data);
+  //   console.log("address is: ", address);
+  // }
 };
 
 async function main() {
@@ -316,12 +312,12 @@ async function main() {
   await establishPayer();
   await checkProgram_get_pda();
   // await initialize();
-  await hitAddressPdaAccountFromClient('rootkee');
+  await hitAddressPdaAccountFromClient("ABCDE");
   // await updateAddress("roorkee");
-await getAddress();
+  await getAddress();
   // @ts-ignore
   // await updateProfile({name:'samad',date:1, month:1,year:2000})
-// await getProfile()
-  }
+  // await getProfile()
+}
 
 main();
